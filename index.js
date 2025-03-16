@@ -1,10 +1,15 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import UserModel from './models/user.js';
-import cors from 'cors'
+import cors from 'cors';
+import dotenv from 'dotenv';
+dotenv.config();
+// require('dotenv').config(); // Загружает переменные из .env в process.env
+
 
 mongoose
-  .connect('mongodb+srv://admin:admin135!@wolf.8kuog.mongodb.net/wolf')
+  .connect(process.env.DATABASE_URL)
+//   .connect('mongodb+srv://admin:admin135!@wolf.8kuog.mongodb.net/wolf')
   .then(() => console.log('DB OK'))
   .catch((err) => console.log('db error:', err));
 

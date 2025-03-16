@@ -4,7 +4,7 @@ import UserModel from './models/user.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
-// require('dotenv').config(); // Загружает переменные из .env в process.env
+
 
 
 mongoose

@@ -9,7 +9,6 @@ dotenv.config();
 
 mongoose
   .connect(process.env.DATABASE_URL)
-//   .connect('mongodb+srv://admin:admin135!@wolf.8kuog.mongodb.net/wolf')
   .then(() => console.log('DB OK'))
   .catch((err) => console.log('db error:', err));
 

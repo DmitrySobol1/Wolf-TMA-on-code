@@ -17,13 +17,13 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send('hello man');
 });
 
 
 // вход пользователя в аппку
-app.post('/enter', async (req, res) => {
+app.post('/api/enter', async (req, res) => {
   try {
         const user = await UserModel.findOne({ tlgid: req.body.tlgid });
 
@@ -50,7 +50,7 @@ app.post('/enter', async (req, res) => {
 
 
 // обновление score
-app.post('/scoreincrement', async (req, res) => {
+app.post('/api/scoreincrement', async (req, res) => {
     try {
         const updatedUser = await UserModel.findOneAndUpdate(
             { tlgid: req.body.tlgid }, // Условие поиска

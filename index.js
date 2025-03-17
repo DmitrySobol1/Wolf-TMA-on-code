@@ -100,31 +100,6 @@ async function createNewUser(tlgid) {
 }
 
 
-// app.post('/create', async (req, res) => {
-//   try {
-//     const doc = new UserModel({
-//       tlgid: req.body.tlgid,
-//       score: 1000,
-//       energy: 1000,
-//       userLevel: 1,
-//       isSentWalletAdress: false,
-//     });
-
-//     const user = await doc.save();
-
-//     res.json(user);
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({
-//       message: 'не удалось зарегистрироваться',
-//     });
-//   }
-// });
-
-
-
-
-
 
 
 app.listen(4444, (err) => {

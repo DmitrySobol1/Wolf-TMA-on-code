@@ -31,11 +31,12 @@ app.post('/api/enter', async (req, res) => {
         // получить инфо из функции createNewUser - что объект создался и вывести на фронт "приветствие" для юзера
         if (!user) {
         await createNewUser(req.body.tlgid);
-        return res.json({ msg: 'создаю юзера' });
+        return res.json({ result: 'created' });
         }
 
         // тут извлечь инфо о юзере из БД и передать на фронт
         const {_id,createdAt,updatedAt, ...userData} = user._doc
+        userData.result = 'exist';
         return res.json(userData);
 
   } catch (err) {

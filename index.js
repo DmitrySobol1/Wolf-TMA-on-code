@@ -55,7 +55,7 @@ app.post('/api/scoreincrement', async (req, res) => {
     try {
         const updatedUser = await UserModel.findOneAndUpdate(
             { tlgid: req.body.tlgid }, // Условие поиска
-            { $inc: { score: 1 } },    // Обновление
+            { $inc: { score: 1, energy:-1 } },    // Обновление
             { new: true }              // Возвращать обновлённый документ
         );
 
@@ -81,6 +81,67 @@ app.post('/api/scoreincrement', async (req, res) => {
 
 
 
+// смена языка
+app.post('/api/setlanguage', async (req, res) => {
+  try {
+      const updatedUser = await UserModel.findOneAndUpdate(
+          { tlgid: req.body.tlgid }, // Условие поиска
+          { $set: { language: req.body.language } },    // Обновление
+          { new: true }              // Возвращать обновлённый документ
+      );
+
+      if (!updatedUser) {
+          return res.status(404).json({
+              message: 'Пользователь не найден',
+          });
+      }
+
+      res.json(updatedUser.language); // Возвращаем обновлённый документ
+      // res.json('added'); // Возвращаем обновлённый документ
+      // res.json(user._doc)
+
+  } catch (err) {
+      console.log(err);
+      res.status(500).json({
+          message: 'Ошибка сервера',
+          error: err.message, // Добавляем сообщение об ошибке для отладки
+      });
+  }
+});
+
+
+
+
+// смена уровня
+app.post('/api/setuserLevel', async (req, res) => {
+  try {
+      const updatedUser = await UserModel.findOneAndUpdate(
+          { tlgid: req.body.tlgid }, // Условие поиска
+          { $set: { userLevel: req.body.userLevel } },    // Обновление
+          { new: true }              // Возвращать обновлённый документ
+      );
+
+      if (!updatedUser) {
+          return res.status(404).json({
+              message: 'Пользователь не найден',
+          });
+      }
+
+      res.json(updatedUser.language); // Возвращаем обновлённый документ
+      // res.json('added'); // Возвращаем обновлённый документ
+      // res.json(user._doc)
+
+  } catch (err) {
+      console.log(err);
+      res.status(500).json({
+          message: 'Ошибка сервера',
+          error: err.message, // Добавляем сообщение об ошибке для отладки
+      });
+  }
+});
+
+
+
 
 async function createNewUser(tlgid) {
   try {
@@ -99,6 +160,8 @@ async function createNewUser(tlgid) {
     console.log(err);
   }
 }
+
+
 
 
 

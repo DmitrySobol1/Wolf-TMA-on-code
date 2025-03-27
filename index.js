@@ -24,6 +24,24 @@ app.get('/api', (req, res) => {
   res.send('hello man');
 });
 
+// вывод своих рефералов
+app.get('/api/getMyReferal', async (req, res) => {
+  try {
+    const result = await ReferalPairsModel.find({
+      referer: req.query.tlgid,
+    });
+
+    // const { tlgid } = req.query; // GET-параметры приходят в `req.query`
+
+    return res.json(result);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'ошибка сервера',
+    });
+  }
+});
+
 // вход пользователя в аппку
 app.post('/api/enter', async (req, res) => {
   try {

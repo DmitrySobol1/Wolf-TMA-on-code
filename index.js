@@ -5,6 +5,10 @@ import ReferalPairsModel from './models/referalPairs.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
+import { TEXTS } from './texts.js';
+
+import https from 'https';
+const baseurl = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`;
 
 mongoose
   .connect(process.env.DATABASE_URL)
@@ -143,12 +147,12 @@ app.post('/api/postReferalPair', async (req, res) => {
     }
 
     const { _id, createdAt, updatedAt, ...refPair } = isExist._doc;
-    return res.json('already exist:', refPair);
-  
+    return res.json('already exist');
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: 'Ошибка сервера',
+      result: 'exist',
+      message: 'ошибка',
       error: err.message, // Добавляем сообщение об ошибке для отладки
     });
   }
@@ -163,6 +167,7 @@ async function createNewUser(tlgid) {
       userLevel: 1,
       isSentWalletAdress: false,
       language: 'ru',
+      referalQty: 0,
     });
 
     const user = await doc.save();
@@ -173,6 +178,7 @@ async function createNewUser(tlgid) {
 
 async function saveNewReferalPair(father, son, username) {
   try {
+    // добавление пары в refPairs
     const pair = new ReferalPairsModel({
       referer: father,
       referal: son,
@@ -180,9 +186,54 @@ async function saveNewReferalPair(father, son, username) {
     });
 
     const newPair = await pair.save();
+
+    // КОРРЕКТ +500 баллов за реферала и +1 к количеству рефералов
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { tlgid: father }, // Условие поиска
+      { $inc: { score: 500, referalQty: 1 } }, // Обновление
+      { new: true } // Возвращать обновлённый документ
+    );
+
+    const referalQty = updatedUser.referalQty;
+    const language = updatedUser.language;
+
+    // если =10 рефералов, то назначаем уровень 2
+    if (referalQty == 10) {
+      const level = 2;
+      const updatedUser = await UserModel.findOneAndUpdate(
+        { tlgid: father }, // Условие поиска
+        { $set: { userLevel: level } }, // Обновление
+        { new: true } // Возвращать обновлённый документ
+      );
+      sendTlgMessage(father, level, language);
+    }
   } catch (err) {
     console.log(err);
   }
+}
+
+function sendTlgMessage(father, level, language) {
+  const sendingText = TEXTS[language].text;
+  const params = `?chat_id=${father}&text=${sendingText} ${level}`;
+  const url = baseurl + params;
+
+  https
+    .get(url, (response) => {
+      let data = '';
+
+      // Получаем данные частями
+      // response.on('data', (chunk) => {
+      //   data += chunk;
+      // });
+
+      // Когда запрос завершён
+      response.on('end', () => {
+        console.log(JSON.parse(data)); // Выводим результат
+      });
+    })
+    .on('error', (err) => {
+      console.error('Ошибка:', err);
+    });
 }
 
 app.listen(4444, (err) => {

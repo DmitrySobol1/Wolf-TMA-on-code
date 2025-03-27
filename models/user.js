@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    referalQty: {
+      type: Number,
+      required: true,
+    },
     walletAdress: String,
     isSentWalletAdress: {
       type: Boolean,

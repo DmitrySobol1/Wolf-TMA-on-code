@@ -6,6 +6,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
 import { TEXTS } from './texts.js';
+import './EnergyRestore/cron.js'; // Импорт планировщика
 
 import https from 'https';
 const baseurl = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`;

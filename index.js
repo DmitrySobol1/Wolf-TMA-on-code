@@ -51,7 +51,7 @@ app.post('/api/enter', async (req, res) => {
     //тут запустить создание юзера
     // получить инфо из функции createNewUser - что объект создался и вывести на фронт "приветствие" для юзера
     if (!user) {
-      await createNewUser(req.body.tlgid);
+      await createNewUser(req.body.tlgid, req.body.language);
       return res.json({ result: 'created' });
     }
 
@@ -177,7 +177,7 @@ app.post('/api/postReferalPair', async (req, res) => {
   }
 });
 
-async function createNewUser(tlgid) {
+async function createNewUser(tlgid, language) {
   try {
     const doc = new UserModel({
       tlgid: tlgid,
@@ -185,7 +185,7 @@ async function createNewUser(tlgid) {
       energy: 1000,
       userLevel: 1,
       isSentWalletAdress: false,
-      language: 'ru',
+      language: language,
       referalQty: 0,
     });
 

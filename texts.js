@@ -4,7 +4,7 @@ export const TEXTS = {
         text: 'Вы достигли нового уровня:',
               },
       en: {
-        text: 'You got new level:',
+        text: 'You have reached new level:',
     },
     de: {
         text: 'Sie haben eine neue Stufe erreicht:',

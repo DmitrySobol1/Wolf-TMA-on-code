@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import UserModel from './models/user.js';
 import ReferalPairsModel from './models/referalPairs.js';
+import ChangePointToCoinsModel from './models/changePointToCoins.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -177,6 +178,28 @@ app.post('/api/postReferalPair', async (req, res) => {
   }
 });
 
+// TODO: сделать
+// +1) новую БД
+// +2) сообщение админу
+// 3) фронт для админа, с возможностью отмечать
+
+// запрос на обмен монет
+app.post('/api/changeRqst', async (req, res) => {
+  try {
+    const NewRqst = new ChangePointToCoinsModel({
+      userid: req.body.tlgid,
+      walletAdress: req.body.walletAdress,
+      sum: req.body.sum,
+      isCoinSentToUserByAdmid: false,
+    });
+
+    const rqst = await NewRqst.save();
+    sendMessageToAdmin(req.body.tlgid, req.body.walletAdress, req.body.sum);
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 async function createNewUser(tlgid, language) {
   try {
     const doc = new UserModel({
@@ -244,6 +267,25 @@ function sendTlgMessage(father, level, language) {
       // response.on('data', (chunk) => {
       //   data += chunk;
       // });
+
+      // Когда запрос завершён
+      response.on('end', () => {
+        console.log(JSON.parse(data)); // Выводим результат
+      });
+    })
+    .on('error', (err) => {
+      console.error('Ошибка:', err);
+    });
+}
+
+function sendMessageToAdmin(userid, walletAdress, sum) {
+  const sendingText = `Запрос на обмен монет:%0Auser: ${userid} %0A${walletAdress} %0Aсумма: ${sum}`;
+  const params = `?chat_id=${process.env.ADMIN_TLGID}&text=${sendingText}`;
+  const url = baseurl + params;
+
+  https
+    .get(url, (response) => {
+      let data = '';
 
       // Когда запрос завершён
       response.on('end', () => {

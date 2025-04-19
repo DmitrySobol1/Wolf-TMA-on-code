@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import UserModel from './models/user.js';
 import ReferalPairsModel from './models/referalPairs.js';
 import ChangePointToCoinsModel from './models/changePointToCoins.js';
+import logAdminActionChangePointToCoinsModel from './models/logAdminActionChangePointToCoins.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -297,9 +298,99 @@ function sendMessageToAdmin(userid, walletAdress, sum) {
     });
 }
 
+function sendMessageToUser(userid) {
+  const sendingText = 'На ваш кошелек зачиcлены монеты';
+  const params = `?chat_id=${userid}&text=${sendingText}`;
+  const url = baseurl + params;
+
+  https
+    .get(url, (response) => {
+      let data = '';
+
+      // Когда запрос завершён
+      response.on('end', () => {
+        console.log(JSON.parse(data)); // Выводим результат
+      });
+    })
+    .on('error', (err) => {
+      console.error('Ошибка:', err);
+    });
+}
+
 app.listen(4444, (err) => {
   if (err) {
     return console.log(err);
   }
   console.log('server has been started');
+});
+
+// TODO: настроить, чтобы только админ мог данный запрос слать
+// юзер из массива юзеров
+
+// админ - показать всех пользователей
+app.get('/api/getAllUsers', async (req, res) => {
+  try {
+    const result = await UserModel.find().sort({ score: -1 });
+
+    return res.json(result);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'ошибка сервера',
+    });
+  }
+});
+
+// админ - показать все запросы на обмен
+app.get('/api/getAllChangeRqst', async (req, res) => {
+  try {
+    const result = await ChangePointToCoinsModel.find({
+      isCoinSentToUserByAdmid: false,
+    });
+
+    return res.json(result);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'ошибка сервера',
+    });
+  }
+});
+
+// логирование админа - обмен монет завершен
+app.post('/api/logChanging', async (req, res) => {
+  try {
+    const NewRqst = new logAdminActionChangePointToCoinsModel({
+      rqstnumber: req.body.rqstId,
+      usertlg: req.body.userId,
+      sum: req.body.summa,
+    });
+
+    const rqst = await NewRqst.save();
+    // return res.json('ok');
+
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { tlgid: req.body.userId },
+      { $inc: { score: -req.body.summa } }
+      // { new: true }
+    );
+
+    const updatedStatus = await ChangePointToCoinsModel.findOneAndUpdate(
+      { _id: req.body.rqstId },
+      { isCoinSentToUserByAdmid: true }
+      // { new: true }
+    );
+
+    sendMessageToUser(req.body.userId);
+
+    return res.json('succes');
+    // if (!updatedUser) {
+    //   return res.status(404).json({
+    //     message: 'some info',
+    //   });
+    // }
+  } catch (err) {
+    console.log(err);
+    return res.json('not succes');
+  }
 });
